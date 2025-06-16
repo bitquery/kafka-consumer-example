@@ -14,13 +14,7 @@ const topic = 'tron.broadcasted.transactions'
 
 const kafka = new Kafka({
     clientId: username,
-    brokers: ['rpk0.bitquery.io:9093', 'rpk1.bitquery.io:9093', 'rpk2.bitquery.io:9093'],
-    ssl: {
-        rejectUnauthorized: false,
-        ca: [fs.readFileSync('server.cer.pem', 'utf-8')],
-        key: fs.readFileSync('client.key.pem', 'utf-8'),
-        cert: fs.readFileSync('client.cer.pem', 'utf-8')
-    },
+    brokers: ['rpk0.bitquery.io:9092', 'rpk1.bitquery.io:9092', 'rpk2.bitquery.io:9092'],
     sasl: {
         mechanism: "scram-sha-512",
         username: username,
