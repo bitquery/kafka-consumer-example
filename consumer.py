@@ -13,13 +13,10 @@ topic = '<TOPIC>' # ' e.g. tron.broadcasted.transactions
 
 # Kafka consumer configuration
 conf = {
-    'bootstrap.servers': 'rpk0.bitquery.io:9093,rpk1.bitquery.io:9093,rpk2.bitquery.io:9093',
+    'bootstrap.servers': 'rpk0.bitquery.io:9092,rpk1.bitquery.io:9092,rpk2.bitquery.io:9092',
     'group.id': username + '-mygroup',  # Generate a unique group ID
     'session.timeout.ms': 30000,
-    'security.protocol': 'SASL_SSL',
-    'ssl.ca.location': 'server.cer.pem',
-    'ssl.key.location': 'client.key.pem',
-    'ssl.certificate.location': 'client.cer.pem',
+    'security.protocol': 'SASL_PLAINTEXT',
     'ssl.endpoint.identification.algorithm': 'none',
     'sasl.mechanisms': 'SCRAM-SHA-512',
     'sasl.username': username,
