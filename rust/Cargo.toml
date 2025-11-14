@@ -1,0 +1,24 @@
+[package]
+name = "hage-kafka"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+rdkafka = {  version = "0.37.0", features = ["sasl", "ssl", "gssapi","cmake-build"] }
+
+config = "0.14"
+serde = { version = "1.0", features = ["derive"] }
+
+
+tokio = { version = "1.18", features = ["macros","rt-multi-thread"] }
+log = "0.4"           # (Optional) for logging
+env_logger = "0.11.6"    # (Optional) for initializing logger
+# Added for protobuf parsing
+prost = "0.11.7"
+prost-types = "0.11.7"
+prost-build = "0.13.5"
+bs58 = "0.4"
+
+[build-dependencies]
+prost-build = "0.13.5"
