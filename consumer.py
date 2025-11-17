@@ -7,15 +7,11 @@ from confluent_kafka import Consumer, KafkaError, KafkaException
 from google.protobuf.message import DecodeError
 from google.protobuf.descriptor import FieldDescriptor
 from solana import parsed_idl_block_message_pb2
-from queue import Queue, Empty
 import logging
 import config
 import datetime
 import threading
-import time
 import signal
-import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Kafka consumer configuration
 group_id_suffix = uuid.uuid4().hex
@@ -35,10 +31,9 @@ consumer = Consumer(conf)
 topic = 'solana.transactions.proto' 
 consumer.subscribe([topic])
 
-# Thread-safe message queue with size limit
-message_queue = Queue(maxsize=5000)
 # Control flag for graceful shutdown
 shutdown_event = threading.Event()
+processed_count = 0
 
 
 # Logging setup
@@ -89,37 +84,8 @@ def print_protobuf_message(msg, indent=0, encoding='base58'):
         else:
             print(f"{prefix}{field.name}: {value}")
 
-# --- Process messages from Kafka --- #
-
-def message_processor():
-    """Worker thread that processes messages from the queue"""
-    thread_name = threading.current_thread().name
-    logger.info(f"{thread_name} started")
-
-    
-    while not shutdown_event.is_set():
-        try:
-            # Get message with timeout to allow checking shutdown event
-            payload = message_queue.get(timeout=1.0)
-            if payload is None:  # Sentinel value for shutdown
-                break
-                
-            # Process the message
-            process_message(payload)
-            
-                    
-        except Empty:
-            # Queue timeout, continue to check shutdown event
-            continue
-        except Exception as e:
-            logger.exception(f"Error in {thread_name}: {e}")
-            # Continue processing other messages
-            continue
-    
-    logger.info(f"{thread_name} stopped. Local processed: {local_processed}")
-
 def process_message(buffer):
-    """Process a single protobuf message - thread-safe"""
+    """Process a single protobuf message"""
     try:
         tx_block = parsed_idl_block_message_pb2.ParsedIdlBlockMessage()
         tx_block.ParseFromString(buffer)
@@ -127,8 +93,7 @@ def process_message(buffer):
         timestamp = datetime.datetime.now(datetime.timezone.utc)
 
 
-        with threading.Lock():
-            print(f"\n Block: {tx_block.Header.Slot} | Time: {timestamp}")
+        print(f"\n Block: {tx_block.Header.Slot} | Time: {timestamp}")
 
         # below code will print tx signature and block number, uncommment if you need to test
         #    if hasattr(tx_block, 'Transactions') and tx_block.Transactions:
@@ -154,26 +119,10 @@ def signal_handler(signum, frame):
 # --- Main execution --- #
 
 def main():
+    global processed_count
     # Set up signal handlers for graceful shutdown
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
-    # Number of worker threads 
-    num_workers = 6
-    
-    # Start multiple message processor threads
-    processor_threads = []
-    for i in range(num_workers):
-        thread = threading.Thread(
-            target=message_processor,
-            name=f"MessageProcessor-{i}",
-            daemon=True
-        )
-        thread.start()
-        processor_threads.append(thread)
-        logger.info(f"Started message processor thread {i}")
-    
-    logger.info(f"Started {num_workers} message processor threads")
     
     # Main thread: Kafka polling loop
     try:
@@ -187,12 +136,11 @@ def main():
                     continue
                 else:
                     raise KafkaException(msg.error())
-            
-            # Add message to queue (non-blocking)
             try:
-                message_queue.put(msg.value(), timeout=0.1)
-            except Queue.Full:
-                logger.warning("Message queue full, skipping message")
+                process_message(msg.value())
+                processed_count += 1
+            except Exception as err:
+                logger.exception(f"Failed to process message: {err}")
                
                 
     except KeyboardInterrupt:
@@ -203,15 +151,7 @@ def main():
         # Graceful shutdown
         logger.info("Initiating graceful shutdown...")
         shutdown_event.set()
-        
-        # Wait for all processor threads to finish (with timeout)
-        for i, thread in enumerate(processor_threads):
-            thread.join(timeout=5.0)
-            if thread.is_alive():
-                logger.warning(f"Processor thread {i} did not terminate gracefully")
-            else:
-                logger.info(f"Processor thread {i} terminated successfully")
-        
+
         # Close Kafka consumer
         consumer.close()
         logger.info(f"Shutdown complete. Total messages processed: {processed_count}")
