@@ -20,7 +20,7 @@
 #### **Step 3: Update Kafka Properties**
 - Update Kafka properties to use the JKS keystore:
   ```java
-  props.put("ssl.keystore.location", "certs/keystore.jks");
+  props.put("ssl.keystore.location", "keystore.jks");
   props.put("ssl.keystore.password", "123456");
   props.put("ssl.key.password", "123456");
   ```
@@ -37,7 +37,7 @@
    ```
 
 2. **Split the Certificates**
-   - Extract and save individual certificates (e.g., `broker_cert.pem`, `intermediate_cert.pem`).
+   - Extract and save individual certificates.
 
 3. **Import Certificates into Truststore**
    ```bash
