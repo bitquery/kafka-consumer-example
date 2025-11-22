@@ -24,7 +24,9 @@ import org.slf4j.LoggerFactory;
 // export KAFKA_TRUSTSTORE_PASSWORD="password"
 // export KAFKA_KEYSTORE_PASSWORD="password"
 // instructions on generating truststore from certificates is here https://github.com/bitquery/kafka-consumer-example/blob/main/Java/SETUP.md
-
+// commands to run below
+// MAVEN_OPTS="-Djava.net.preferIPv4Stack=true" mvn dependency:resolve
+// MAVEN_OPTS="-Djava.net.preferIPv4Stack=true" mvn clean compile exec:java -U
 
 public class KafkaConsumerApp {
     private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerApp.class);
