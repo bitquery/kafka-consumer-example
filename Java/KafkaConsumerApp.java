@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 // export KAFKA_SECURITY_PROTOCOL="SASL_SSL"
 // export KAFKA_TRUSTSTORE_PASSWORD="password"
 // export KAFKA_KEYSTORE_PASSWORD="password"
-
+// instructions on generating truststore from certificates is here https://github.com/bitquery/kafka-consumer-example/blob/main/Java/SETUP.md
 
 
 public class KafkaConsumerApp {
