@@ -32,8 +32,8 @@ keytool -import -alias kafka-server -file certs/server.cer.pem -keystore certs/t
 
 Notes:
 
-Replace password with your desired passwords if needed
-The first command creates keystore.p12 (PKCS12 format) for client authentication
-The second command creates truststore.jks (JKS format) for server certificate validation
-Both files are already embedded in your application in the src/main/resources/certs/ directory
-The default passwords in the code are set to "password" - adjust the env vars if you use different passwords
+- Replace password with your desired passwords if needed
+- The first command creates keystore.p12 (PKCS12 format) for client authentication
+- The second command creates truststore.jks (JKS format) for server certificate validation
+- Both files are already embedded in your application in the src/main/resources/certs/ directory
+- The default passwords in the code are set to "password" - adjust the env vars if you use different passwords
