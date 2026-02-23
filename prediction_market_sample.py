@@ -93,7 +93,7 @@ def process_message(buffer):
     try:
         tx_block = prediction_market_block_message_pb2.PredictionMarketBlockMessage()
         tx_block.ParseFromString(buffer)
-        print_protobuf_message(tx_block, encoding='hex')  # uncomment this to print the message
+        print_protobuf_message(tx_block, encoding='hex')  # comment or uncomment this to print the message
 
     except DecodeError as err:
         logger.error(f"Protobuf decoding error: {err}")
@@ -113,7 +113,6 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    # Assign partitions and seek to specific offset if provided
     consumer.subscribe([topic])
     
     # Main thread: Kafka polling loop
